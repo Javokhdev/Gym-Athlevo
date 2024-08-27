@@ -1,0 +1,4 @@
+[submodule "gym_protos"]
+	path = gym_protos
+	url = https://github.com/SobirovAzizbekFarhodovich/gym_protos.git
+	branch = master
