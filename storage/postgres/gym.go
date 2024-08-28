@@ -20,8 +20,8 @@ func NewGym(db *sql.DB) *Gym {
 }
 
 func (s *Gym) CreateGym(gym *pb.CreateGymRequest) (*pb.CreateGymResponse, error) {
-	query := `INSERT INTO sport_halls(name,location,contact_number,latitude,longtitude,type_sport,type_gender)VALUES($1,$2,$3,$4,$5,$6,$7)`
-	_, err := s.db.Exec(query, gym.Name, gym.Location, gym.ContactNumber, gym.Latitude, gym.Longtitude, gym.TypeSport, gym.TypeGender)
+	query := `INSERT INTO sport_halls(name,owner_id,location,contact_number,latitude,longtitude,type_sport,type_gender)VALUES($1,$2,$3,$4,$5,$6,$7,$8)`
+	_, err := s.db.Exec(query, gym.Name,gym.OwnerId, gym.Location, gym.ContactNumber, gym.Latitude, gym.Longtitude, gym.TypeSport, gym.TypeGender)
 	if err != nil {
 		return nil, errors.New("Gym was not created")
 	}
@@ -36,6 +36,10 @@ func (s *Gym) UpdateGym(gym *pb.UpdateGymRequest) (*pb.UpdateGymResponse, error)
 	if gym.Name != "string" && gym.Name != "" {
 		condition = append(condition, fmt.Sprintf("name = $%d", len(args)+1))
 		args = append(args, gym.Name)
+	}
+	if gym.OwnerId != "string" && gym.OwnerId != ""{
+		condition = append(condition, fmt.Sprintf("owner_id = $%d", len(args)+1))
+		args = append(args, gym.OwnerId)
 	}
 	if gym.Location != "string" && gym.Location != "" {
 		condition = append(condition, fmt.Sprintf("location = $%d", len(args)+1))
@@ -92,7 +96,7 @@ func (s *Gym) DeleteGym(gym *pb.DeleteGymRequest) (*pb.DeleteGymResponse, error)
 
 func (s *Gym) GetGym(gym *pb.GetGymRequest) (*pb.GetGymResponse, error) {
 	query := `
-		SELECT id, name, longtitude, latitude, location, contact_number, type_sport, type_gender FROM sport_halls 
+		SELECT id, owner_id, name, longtitude, latitude, location, contact_number, type_sport, type_gender FROM sport_halls 
 		WHERE id = $1 AND deleted_at = 0
 	`
 	row := s.db.QueryRow(query, gym.Id)
@@ -100,6 +104,7 @@ func (s *Gym) GetGym(gym *pb.GetGymRequest) (*pb.GetGymResponse, error) {
 	user := pb.GetGymResponse{}
 	err := row.Scan(
 		&user.Id,
+		&user.OwnerId,
 		&user.Name,
 		&user.Longtitude,
 		&user.Latitude,
@@ -124,6 +129,7 @@ func (r *Gym) ListGym(gym *pb.ListGymRequest) (*pb.ListGymResponse, error) {
 	query := `
 	SELECT
 	 id,
+	 owner_id,
 	 name,
 	 longtitude,
 	 latitude,
@@ -184,6 +190,7 @@ func (r *Gym) ListGym(gym *pb.ListGymRequest) (*pb.ListGymResponse, error) {
 
 		err := rows.Scan(
 			&gymResponse.Id,
+			&gymResponse.OwnerId,
 			&gymResponse.Name,
 			&gymResponse.Longtitude,
 			&gymResponse.Latitude,
