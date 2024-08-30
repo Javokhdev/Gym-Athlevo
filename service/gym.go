@@ -20,7 +20,7 @@ func NewGymService(stg s.StorageI) *GymService {
 func (s *GymService) CreateGym(c context.Context,gym *pb.CreateGymRequest) (*pb.CreateGymResponse, error){
 	_, err := s.stg.Gym().CreateGym(gym)
 	if err != nil {
-		return nil, errors.New("gym was not created")
+		return nil, err
 	}
 	return nil, nil
 }

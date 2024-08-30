@@ -20,7 +20,7 @@ func NewUniqueService(stg s.StorageI) *UniqueService {
 func (s *UniqueService) CreateUnique(c context.Context,Unique *pb.CreateUniqueRequest) (*pb.CreateUniqueResponse, error){
 	_, err := s.stg.Unique().CreateUnique(Unique)
 	if err != nil {
-		return nil, errors.New("unique was not created")
+		return nil, err
 	}
 	return nil, nil
 }
@@ -44,7 +44,7 @@ func (s *UniqueService) DeleteUnique(c context.Context,Unique *pb.DeleteUniqueRe
 func (s *UniqueService) GetUnique(c context.Context,Unique *pb.GetUniqueRequest) (*pb.GetUniqueResponse, error){
 	res, err := s.stg.Unique().GetUnique(Unique)
 	if err != nil {
-		return nil, errors.New("unique not found")
+		return nil, errors.New("no rows in result set")
 	}
 	return res, nil
 }

@@ -21,9 +21,9 @@ func NewGym(db *sql.DB) *Gym {
 
 func (s *Gym) CreateGym(gym *pb.CreateGymRequest) (*pb.CreateGymResponse, error) {
 	query := `INSERT INTO sport_halls(name,owner_id,location,contact_number,latitude,longtitude,type_sport,type_gender)VALUES($1,$2,$3,$4,$5,$6,$7,$8)`
-	_, err := s.db.Exec(query, gym.Name,gym.OwnerId, gym.Location, gym.ContactNumber, gym.Latitude, gym.Longtitude, gym.TypeSport, gym.TypeGender)
+	_, err := s.db.Exec(query, gym.Name, gym.OwnerId, gym.Location, gym.ContactNumber, gym.Latitude, gym.Longtitude, gym.TypeSport, gym.TypeGender)
 	if err != nil {
-		return nil, errors.New("Gym was not created")
+		return nil, err
 	}
 	return nil, nil
 }
@@ -37,7 +37,7 @@ func (s *Gym) UpdateGym(gym *pb.UpdateGymRequest) (*pb.UpdateGymResponse, error)
 		condition = append(condition, fmt.Sprintf("name = $%d", len(args)+1))
 		args = append(args, gym.Name)
 	}
-	if gym.OwnerId != "string" && gym.OwnerId != ""{
+	if gym.OwnerId != "string" && gym.OwnerId != "" {
 		condition = append(condition, fmt.Sprintf("owner_id = $%d", len(args)+1))
 		args = append(args, gym.OwnerId)
 	}

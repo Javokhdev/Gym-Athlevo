@@ -22,12 +22,12 @@ func (s *Unique) CreateUnique(unique *pb.CreateUniqueRequest) (*pb.CreateUniqueR
 	query := `INSERT INTO gym_facility(sport_halls_id,facility_id,count)VALUES($1,$2,$3)`
 	_, err := s.db.Exec(query, unique.SportHallsId, unique.FacilityId, unique.Count)
 	if err != nil {
-		return nil, errors.New("Unique was not created")
+		return nil, err
 	}
 	return nil, nil
 }
 func (s *Unique) UpdateUnique(unique *pb.UpdateUniqueRequest) (*pb.UpdateUniqueResponse, error) {
-	query := `UPDATE unique SET `
+	query := `UPDATE gym_facility SET `
 	var condition []string
 	var args []interface{}
 
@@ -88,7 +88,7 @@ func (s *Unique) GetUnique(unique *pb.GetUniqueRequest) (*pb.GetUniqueResponse, 
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, errors.New("unique not found")
+			return nil, errors.New("no rows in result set")
 		}
 		return nil, err
 	}
