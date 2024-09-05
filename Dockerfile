@@ -1,19 +1,16 @@
-FROM golang:1.22.3-alpine AS build
-
+FROM golang:1.22.3 AS builder
 WORKDIR /app
-
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
 COPY . .
-
-RUN go build -o gym_service
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o myapp .
 
 FROM alpine:latest
-
-WORKDIR /root/
-
-COPY --from=build /app/gym_service .
+WORKDIR /app
+COPY --from=builder /app/myapp .
 
 COPY .env .
+EXPOSE 50051
+CMD ["./myapp"]
 
-EXPOSE 50001
-
-CMD ["./gym_service"]
