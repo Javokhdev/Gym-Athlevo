@@ -3,17 +3,19 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
-	_ "github.com/lib/pq"
 	"gym/config"
 	postgres "gym/storage"
+
+	_ "github.com/lib/pq"
 )
 
 type Storage struct {
-	db              *sql.DB
-	GymC        postgres.GymI
-	FacilityC   postgres.FacilityI
-	UniqueC     postgres.UniqueI
+	db        *sql.DB
+	GymC      postgres.GymI
+	FacilityC postgres.FacilityI
+	UniqueC   postgres.UniqueI
 }
 
 func NewStorage(db *sql.DB) *Storage {
@@ -36,15 +38,15 @@ func ConnectDb() (*Storage, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	log.Println("Postgres connected succesfully")
 	gymS := NewGym(db)
 	FacilityS := NewFacility(db)
 	UniqueS := NewUnique(db)
 
 	return &Storage{
-		GymC:        gymS,
-		FacilityC:   FacilityS,
-		UniqueC:     UniqueS,
+		GymC:      gymS,
+		FacilityC: FacilityS,
+		UniqueC:   UniqueS,
 	}, nil
 }
 
