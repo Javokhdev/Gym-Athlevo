@@ -49,7 +49,7 @@ func (s *Unique) UpdateUnique(unique *pb.UpdateUniqueRequest) (*pb.UpdateUniqueR
 	condition = append(condition, "updated_at = now()")
 
 	query += strings.Join(condition, ", ")
-	query += fmt.Sprintf(" WHERE id = $%d", len(args)+1)
+	query += fmt.Sprintf(" WHERE id = $%d and deleted_at = 0", len(args)+1)
 	args = append(args, unique.Id)
 
 	_, err := s.db.Exec(query, args...)
@@ -106,7 +106,7 @@ func (s *Unique) ListUnique(unique *pb.ListUniqueRequest) (*pb.ListUniquesRespon
 
 	query := `
 		SELECT id, sport_halls_id, facility_id, count
-		FROM gym_facility
+		FROM gym_facility WHERE deleted_at = 0
 		ORDER BY created_at DESC
 		LIMIT $1 OFFSET $2
 	`
