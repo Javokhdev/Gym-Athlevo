@@ -6,6 +6,7 @@ import (
 	"fmt"
 	pb "gym/genprotos"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -20,7 +21,13 @@ func NewGym(db *sql.DB) *Gym {
 }
 
 func (s *Gym) CreateGym(gym *pb.CreateGymRequest) (*pb.CreateGymResponse, error) {
-	query := `INSERT INTO sport_halls(name,owner_id,location,contact_number,latitude,longtitude,type_sport,type_gender)VALUES($1,$2,$3,$4,$5,$6,$7,$8)`
+	phoneRegex := regexp.MustCompile(`^998([378]{2}|(9[013-57-9]))\d{7}$`)
+	if !phoneRegex.MatchString(gym.ContactNumber) {
+		return nil, errors.New("invalid contact number format")
+	}
+
+	query := `INSERT INTO sport_halls(name, owner_id, location, contact_number, latitude, longtitude, type_sport, type_gender) 
+	          VALUES($1, $2, $3, $4, $5, $6, $7, $8)`
 	_, err := s.db.Exec(query, gym.Name, gym.OwnerId, gym.Location, gym.ContactNumber, gym.Latitude, gym.Longtitude, gym.TypeSport, gym.TypeGender)
 	if err != nil {
 		return nil, err
@@ -32,6 +39,8 @@ func (s *Gym) UpdateGym(gym *pb.UpdateGymRequest) (*pb.UpdateGymResponse, error)
 	query := `UPDATE sport_halls SET `
 	var condition []string
 	var args []interface{}
+
+	phoneRegex := regexp.MustCompile(`^998([378]{2}|(9[013-57-9]))\d{7}$`)
 
 	if gym.Name != "string" && gym.Name != "" {
 		condition = append(condition, fmt.Sprintf("name = $%d", len(args)+1))
@@ -54,6 +63,9 @@ func (s *Gym) UpdateGym(gym *pb.UpdateGymRequest) (*pb.UpdateGymResponse, error)
 		args = append(args, gym.Latitude)
 	}
 	if gym.ContactNumber != "string" && gym.ContactNumber != "" {
+		if !phoneRegex.MatchString(gym.ContactNumber) {
+			return nil, errors.New("invalid contact number format")
+		}
 		condition = append(condition, fmt.Sprintf("contact_number = $%d", len(args)+1))
 		args = append(args, gym.ContactNumber)
 	}
@@ -76,7 +88,7 @@ func (s *Gym) UpdateGym(gym *pb.UpdateGymRequest) (*pb.UpdateGymResponse, error)
 
 	_, err := s.db.Exec(query, args...)
 	if err != nil {
-		return nil, errors.New("Gym was not updated")
+		return nil, errors.New("gym was not updated")
 	}
 	return nil, nil
 }
@@ -145,7 +157,10 @@ func (r *Gym) ListGym(gym *pb.ListGymRequest) (*pb.ListGymResponse, error) {
 
 	var args []interface{}
 	var conditions []string
-
+	if gym.OwnerId != "" && gym.OwnerId != "string" {
+		conditions = append(conditions, "LOWER(name) LIKE LOWER($"+strconv.Itoa(len(args)+1)+")")
+		args = append(args, "%"+gym.OwnerId+"%")
+	}
 	if gym.Name != "" && gym.Name != "string" {
 		conditions = append(conditions, "LOWER(name) LIKE LOWER($"+strconv.Itoa(len(args)+1)+")")
 		args = append(args, "%"+gym.Name+"%")

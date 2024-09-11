@@ -66,6 +66,7 @@ message ListGymRequest{
     string location = 3;
     string type_sport = 4;
     string type_gender = 5;
+    string owner_id = 6;
 }
 
 message ListGymResponse{
